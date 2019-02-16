@@ -38,7 +38,7 @@ void setup() {
     uint16_t pixelCount = testFrame.getNumPixels(i);
     for (int j=0; j<pixelCount; j++){
       if (j<pixelCount/2-2) {
-        testPixels[j] = {0, 0, 255};
+        testPixels[j] = {0, 255, 0};
       }
       else {
         testPixels[j] = {255, 0, 0};

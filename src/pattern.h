@@ -6,7 +6,7 @@
 
 #define RANGE_MAX 1024
 #define MAX_RANGES 100
-#define MAX_DIMENSIONS
+#define MAX_DIMENSIONS 10
 
 struct PatternFrameRange {
     // 0 to 1024 normalized range
