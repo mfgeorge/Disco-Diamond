@@ -47,12 +47,8 @@ void setup() {
   testPatternFrame.dimensions[0].rangeCount = 2;
 
   // populate the pattern frame 
-  testPatternFrame.dimensions[0].ranges[0].start = 0;
-  testPatternFrame.dimensions[0].ranges[0].end = 511;
-  testPatternFrame.dimensions[0].ranges[0].pixel = {255, 0, 0};
-  testPatternFrame.dimensions[0].ranges[1].start = 512;
-  testPatternFrame.dimensions[0].ranges[1].end = 1023;
-  testPatternFrame.dimensions[0].ranges[1].pixel = {0, 0, 255};
+  testPatternFrame.dimensions[0].ranges[0] = PatternFrameRange(0, 511, {255,0,0});
+  testPatternFrame.dimensions[0].ranges[1] = PatternFrameRange(512, 1023, {0,0,255});
 }
 
 void loop() {
@@ -62,12 +58,10 @@ void loop() {
   testHwFrame.draw();
 
 
-  testPatternFrame.dimensions[0].ranges[0].start = ((205-j)+i) % RANGE_MAX;
-  testPatternFrame.dimensions[0].ranges[0].end = ((205+j)+i) % RANGE_MAX;
-  testPatternFrame.dimensions[0].ranges[0].pixel = {255, 0, 0};
-  testPatternFrame.dimensions[0].ranges[1].start = ((817-j)+i) % RANGE_MAX;
-  testPatternFrame.dimensions[0].ranges[1].end = ((817+j)+i) % RANGE_MAX;
-  testPatternFrame.dimensions[0].ranges[1].pixel = {0, 0, 255};
+  testPatternFrame.dimensions[0].ranges[0] = 
+      PatternFrameRange(((205-j)+i) % RANGE_MAX, ((205+j)+i) % RANGE_MAX, {255,0,0}, {0,255,0});
+  testPatternFrame.dimensions[0].ranges[1] = 
+      PatternFrameRange(((817-j)+i) % RANGE_MAX, ((817+j)+i) % RANGE_MAX, {0,0,255}, {0,255,0});
 
   i += 5;
   j = uint16_t(50.0 * cos((double(i)*6.7)/3000.0) + 62.5);

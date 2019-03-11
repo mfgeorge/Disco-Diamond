@@ -48,10 +48,10 @@ void setup() {
   // populate the pattern frame 
   testPatternFrame.dimensions[0].ranges[0].start = 0;
   testPatternFrame.dimensions[0].ranges[0].end = 511;
-  testPatternFrame.dimensions[0].ranges[0].pixel = {255, 0, 0};
+  testPatternFrame.dimensions[0].ranges[0].start_color = {255, 0, 0};
   testPatternFrame.dimensions[0].ranges[1].start = 512;
   testPatternFrame.dimensions[0].ranges[1].end = 1023;
-  testPatternFrame.dimensions[0].ranges[1].pixel = {0, 0, 255};
+  testPatternFrame.dimensions[0].ranges[1].start_color = {0, 0, 255};
 }
 
 void loop() {
@@ -64,10 +64,10 @@ void loop() {
 
   testPatternFrame.dimensions[0].ranges[0].start = (100+i) % RANGE_MAX;
   testPatternFrame.dimensions[0].ranges[0].end = (311+i) % RANGE_MAX;
-  testPatternFrame.dimensions[0].ranges[0].pixel = {255, 0, 0};
+  testPatternFrame.dimensions[0].ranges[0].start_color = {255, 0, 0};
   testPatternFrame.dimensions[0].ranges[1].start = (712+i) % RANGE_MAX;
   testPatternFrame.dimensions[0].ranges[1].end = (923+i) % RANGE_MAX;
-  testPatternFrame.dimensions[0].ranges[1].pixel = {0, 0, 255};
+  testPatternFrame.dimensions[0].ranges[1].start_color = {0, 0, 255};
 
   i += 5;
 }
