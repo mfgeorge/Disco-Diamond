@@ -1,12 +1,11 @@
-#include <ledstrip.h>
-#include <pins.h>
-#include <pattern.h>
-#include <shape_transform.h>
 #include <Adafruit_NeoPixel.h>
-
+#include <ledstrip.h>
+#include <pattern.h>
+#include <pins.h>
+#include <shape_transform.h>
 
 #ifdef __AVR__
-  #include <avr/power.h>
+#include <avr/power.h>
 #endif
 
 // Parameter 1 = number of pixels in strip
@@ -17,55 +16,58 @@
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 
-Adafruit_NeoPixel strip[] = { Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN2), Adafruit_NeoPixel(42, PIN3), Adafruit_NeoPixel(42, PIN4)};
-  
+Adafruit_NeoPixel strip[] = {
+    Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN2),
+    Adafruit_NeoPixel(42, PIN3), Adafruit_NeoPixel(42, PIN4)};
+
 HwFrame testHwFrame(strip, 4);
 
 PatternFrame testPatternFrame;
 
 VerticalShapeTransform testTransform;
 
-uint16_t i = 0;
-uint16_t j = 200;
+uint16_t position = 0;
+uint16_t length = 200;
 
 void setup() {
-  // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
-  #if defined (__AVR_ATtiny85__)
-    if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
-  #endif
-  // End of trinket special code
+   pinMode(PIN1, OUTPUT);
+   pinMode(PIN2, OUTPUT);
+   pinMode(PIN3, OUTPUT);
+   pinMode(PIN4, OUTPUT);
 
-  pinMode(PIN1, OUTPUT);
-  pinMode(PIN2, OUTPUT);
-  pinMode(PIN3, OUTPUT);
-  pinMode(PIN4, OUTPUT);
+   Serial.begin(115200);
 
-  Serial.begin(115200);
+   // initial settings for pattern frame
+   testPatternFrame.activeDimensions = 1;
+   testPatternFrame.dimensions[0].rangeCount = 2;
 
-  // initial settings for pattern frame 
-  testPatternFrame.activeDimensions = 1;
-  testPatternFrame.dimensions[0].rangeCount = 2;
+   // populate the pattern frame
+   testPatternFrame.dimensions[0].ranges[0] =
+       LinearRange(0, 2 * length, {255, 0, 0}, {0, 255, 0});
+   testPatternFrame.dimensions[0].ranges[1] =
+       LinearRange((RANGE_MAX / 2), (RANGE_MAX / 2) + (2 * length), {0, 0, 255},
+                   {0, 255, 0});
 
-  // populate the pattern frame 
-  testPatternFrame.dimensions[0].ranges[0] = PatternFrameRange(0, 511, {255,0,0});
-  testPatternFrame.dimensions[0].ranges[1] = PatternFrameRange(512, 1023, {0,0,255});
+   testPatternFrame.dimensions[0].ranges[0].Wrap();
+   testPatternFrame.dimensions[0].ranges[1].Wrap();
 }
 
 void loop() {
+   unsigned long start_time = millis();
 
-  testTransform.Transform(&testPatternFrame, &testHwFrame);
+   length = uint16_t(50.0 * cos((float(position) * 6.7) / 3000.0) + 62.5) * 2;
+   position += 5;
 
-  testHwFrame.draw();
+   testPatternFrame.dimensions[0].ranges[0].SetAbsoluteLength(length);
+   testPatternFrame.dimensions[0].ranges[1].SetAbsoluteLength(length);
+   testPatternFrame.dimensions[0].ranges[0].Slide(5);
+   testPatternFrame.dimensions[0].ranges[1].Slide(5);
 
+   testTransform.Transform(&testPatternFrame, &testHwFrame);
+   testHwFrame.draw();
 
-  testPatternFrame.dimensions[0].ranges[0] = 
-      PatternFrameRange(((205-j)+i) % RANGE_MAX, ((205+j)+i) % RANGE_MAX, {255,0,0}, {0,255,0});
-  testPatternFrame.dimensions[0].ranges[1] = 
-      PatternFrameRange(((817-j)+i) % RANGE_MAX, ((817+j)+i) % RANGE_MAX, {0,0,255}, {0,255,0});
+   unsigned long render_time = millis() - start_time;
 
-  i += 5;
-  j = uint16_t(50.0 * cos((double(i)*6.7)/3000.0) + 62.5);
-  Serial.print("j: ");
-  Serial.println(j);
+   // Wait 10 ms between frames but render immediately if we are late.
+   delay(min(0UL, 10UL - render_time));
 }
-
