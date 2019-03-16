@@ -58,8 +58,8 @@ void loop() {
    length = uint16_t(50.0 * cos((float(position) * 6.7) / 3000.0) + 62.5) * 2;
    position += 5;
 
-   testPatternFrame.dimensions[0].ranges[0].SetAbsoluteLength(length);
-   testPatternFrame.dimensions[0].ranges[1].SetAbsoluteLength(length);
+   testPatternFrame.dimensions[0].ranges[0].SetAbsoluteLength(length, TAIL);
+   testPatternFrame.dimensions[0].ranges[1].SetAbsoluteLength(length, TAIL);
    testPatternFrame.dimensions[0].ranges[0].Slide(5);
    testPatternFrame.dimensions[0].ranges[1].Slide(5);
 
@@ -69,5 +69,7 @@ void loop() {
    unsigned long render_time = millis() - start_time;
 
    // Wait 10 ms between frames but render immediately if we are late.
-   delay(min(0UL, 10UL - render_time));
+   if (render_time < 10UL) {
+       delay(10UL - render_time);
+   }
 }
