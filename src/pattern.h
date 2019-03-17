@@ -63,6 +63,12 @@ class AbstractLinearRange {
       int16_t stretched_length = Length() * stretch_factor;
       SetAbsoluteLength(stretched_length, anchor_type);
    }
+
+   void Normalize() {
+      while(start > end) {
+         end += (RANGE_MAX + 1);
+      }
+   }
 };
 
 class LinearRange : public AbstractLinearRange {
