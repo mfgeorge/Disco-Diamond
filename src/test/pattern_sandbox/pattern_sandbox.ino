@@ -43,10 +43,10 @@ void setup() {
 
    // populate the pattern frame
    testPatternFrame.dimensions[0].ranges[0] =
-       LinearRange(0, 2 * length, {255, 0, 0}, {0, 255, 0});
+       LinearRange::Gradient(0, 2 * length, {255, 0, 0}, {0, 255, 0});
    testPatternFrame.dimensions[0].ranges[1] =
-       LinearRange((RANGE_MAX / 2), (RANGE_MAX / 2) + (2 * length), {0, 0, 255},
-                   {0, 255, 0});
+       LinearRange::Gradient((RANGE_MAX / 2), (RANGE_MAX / 2) + (2 * length),
+                             {0, 0, 255}, {0, 255, 0});
 
    testPatternFrame.dimensions[0].ranges[0].Wrap();
    testPatternFrame.dimensions[0].ranges[1].Wrap();
@@ -70,6 +70,6 @@ void loop() {
 
    // Wait 10 ms between frames but render immediately if we are late.
    if (render_time < 10UL) {
-       delay(10UL - render_time);
+      delay(10UL - render_time);
    }
 }

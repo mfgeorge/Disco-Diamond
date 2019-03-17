@@ -24,10 +24,10 @@ void setup() {
    uint16_t length = 200;
    // populate the pattern frame
 
-   pFrame.dimensions[0].ranges[0] = LinearRange(
+   pFrame.dimensions[0].ranges[0] = LinearRange::Gradient(
        RANGE_MAX / 2 - length, RANGE_MAX / 2, {50, 0, 0}, {0, 50, 0});
 
-   pFrame.dimensions[0].ranges[1] = LinearRange(
+   pFrame.dimensions[0].ranges[1] = LinearRange::Gradient(
        RANGE_MAX / 2 + 1, RANGE_MAX / 2 + length, {0, 50, 0}, {0, 0, 50});
 
    pFrame.dimensions[0].ranges[0].Wrap();
