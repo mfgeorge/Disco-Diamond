@@ -10,13 +10,13 @@ using ColorGenerator =
 
 // Generator that generates a single color.
 ColorGenerator SingleColorGenerator(const Pixel &color) {
-   return [color]() { return color; }
+   return [color](uint16_t, uint16_t) { return color; };
 }
 
 // Generator that generates a gradient.
 ColorGenerator GradientGenerator(const Pixel &start_color,
                                  const Pixel &end_color) {
-   return [start_color, end_color](uint16_t curr_point, uint16_t max_points) {
+   return [start_color, end_color](uint16_t curr_point, uint16_t max_points) -> Pixel {
       return {start_color.red +
                   ((end_color.red - start_color.red) * curr_point) /
                       (max_points - 1),
@@ -26,7 +26,7 @@ ColorGenerator GradientGenerator(const Pixel &start_color,
               start_color.blue +
                   ((end_color.blue - start_color.blue) * curr_point) /
                       (max_points - 1)};
-   }
+   };
 }
 
 #endif
