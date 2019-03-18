@@ -2,8 +2,8 @@
 #define PATTERN_H
 
 #include "Arduino.h"
-#include "ledstrip.h"
 #include "color_generator.h"
+#include "ledstrip.h"
 
 #define RANGE_MAX 1023
 #define MAX_RANGES 10
@@ -65,7 +65,7 @@ class AbstractLinearRange {
    }
 
    void Normalize() {
-      while(start > end) {
+      while (start > end) {
          end += (RANGE_MAX + 1);
       }
    }
@@ -89,8 +89,7 @@ class LinearRange : public AbstractLinearRange {
    }
 
    // Empty linear range will not draw anything and exists for convenience.
-   LinearRange()
-       : LinearRange(0, 0, SingleColorGenerator(Pixel{})) {}
+   LinearRange() : LinearRange(0, 0, SingleColorGenerator(Pixel{})) {}
 
    // Generates colors along the parent dimension from start to end using
    // color_generator.
@@ -98,14 +97,28 @@ class LinearRange : public AbstractLinearRange {
        : AbstractLinearRange(start, end), color_generator(color_generator) {}
 };
 
-struct PatternFrameDimension {
+class PatternDimension {
+ public:
    LinearRange ranges[MAX_RANGES];
    uint8_t rangeCount;
+
+   LinearRange* AddLayer() {
+      uint8_t new_range_index = rangeCount;
+      rangeCount++;
+      return &ranges[new_range_index];
+   }
 };
 
-struct PatternFrame {
-   PatternFrameDimension dimensions[MAX_DIMENSIONS];
+class PatternFrame {
+ public:
+   PatternDimension dimensions[MAX_DIMENSIONS];
    uint8_t activeDimensions;
+
+   PatternDimension* AddDimension() {
+      uint8_t new_dimension_index = activeDimensions;
+      activeDimensions++;
+      return &dimensions[new_dimension_index];
+   }
 };
 
 #endif

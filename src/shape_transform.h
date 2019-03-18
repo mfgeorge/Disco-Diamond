@@ -7,8 +7,8 @@
 
 class VerticalShapeTransform {
  public:
-   bool NormalizeRange(const LinearRange &range,
-                       LinearRange *normalized_range) {
+   bool NormalizeRange(const LinearRange& range,
+                       LinearRange* normalized_range) {
       if (range.start > range.end) {
          Serial.println("ERROR: drawing failed because start bigger than end");
          return false;
@@ -40,7 +40,7 @@ class VerticalShapeTransform {
       return true;
    }
 
-   void DrawRange(const LinearRange &range, Pixel *hw_pixels,
+   void DrawRange(const LinearRange& range, Pixel* hw_pixels,
                   uint16_t hw_pixel_count) {
       LinearRange normalized_range;
       // Make sure range is normalized for direct pixel mapping.
@@ -66,14 +66,13 @@ class VerticalShapeTransform {
       }
    }
 
-   void Transform(const PatternFrame *patternFrame, HwFrame *hwFrame) {
+   void Transform(const PatternFrame* patternFrame, HwFrame* hwFrame) {
       for (int i = 0; i < hwFrame->getStripCount(); i++) {
-         Pixel *hw_pixels = hwFrame->getMutablePixels(i);
+         Pixel* hw_pixels = hwFrame->getMutablePixels(i);
          uint16_t hw_pixel_count = hwFrame->getNumPixels(i);
          // Default is the pixel is off
          memset(hw_pixels, 0, hw_pixel_count * sizeof(Pixel));
-         const PatternFrameDimension *curr_dimension =
-             &patternFrame->dimensions[0];
+         const PatternDimension* curr_dimension = &patternFrame->dimensions[0];
          for (int r = 0; r < curr_dimension->rangeCount; r++) {
             DrawRange(curr_dimension->ranges[r], hw_pixels, hw_pixel_count);
          }

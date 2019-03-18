@@ -9,9 +9,9 @@ HwFrame hwFrame(strip, 1);
 PatternFrame pFrame;
 VerticalShapeTransform transform;
 
-LinearRange *background = &pFrame.dimensions[0].ranges[0];
-LinearRange *lower_half = &pFrame.dimensions[0].ranges[1];
-LinearRange *upper_half = &pFrame.dimensions[0].ranges[2];
+LinearRange* background;
+LinearRange* lower_half;
+LinearRange* upper_half;
 
 void setup() {
    pinMode(PIN1, OUTPUT);
@@ -23,8 +23,10 @@ void setup() {
    strip[0].setBrightness(100);
 
    // initial settings for pattern frame
-   pFrame.activeDimensions = 1;
-   pFrame.dimensions[0].rangeCount = 3;
+   auto* dimension = pFrame.AddDimension();
+   background = dimension->AddLayer();
+   lower_half = dimension->AddLayer();
+   upper_half = dimension->AddLayer();
 
    uint16_t initial_length = 200;
    // Populate the pattern frame
