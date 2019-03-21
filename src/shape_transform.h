@@ -42,6 +42,9 @@ class VerticalShapeTransform {
 
    void DrawRange(const LinearRange& range, Pixel* hw_pixels,
                   uint16_t hw_pixel_count) {
+      if (!range.IsVisible()) {
+         return;
+      }
       LinearRange normalized_range;
       // Make sure range is normalized for direct pixel mapping.
       if (!NormalizeRange(range, &normalized_range)) {

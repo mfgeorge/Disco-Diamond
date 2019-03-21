@@ -6,8 +6,8 @@
 #include "ledstrip.h"
 
 #define RANGE_MAX 1023
-#define MAX_RANGES 10
-#define MAX_DIMENSIONS 5
+#define MAX_RANGES 20
+#define MAX_DIMENSIONS 4
 
 enum AnchorType {
    FRONT,
@@ -24,18 +24,21 @@ class AbstractLinearRange {
    // extends past the end.
    bool wrapped;
 
-   AbstractLinearRange() : wrapped(false) {}
+   bool visible_;
+
+   AbstractLinearRange() : wrapped(false), visible_(true) {}
 
    AbstractLinearRange(int16_t start, int16_t end)
-       : start(start), end(end), wrapped(false) {}
+       : start(start), end(end), wrapped(false), visible_(true) {}
+
+   void SetVisible(bool visible) { visible_ = visible; }
+   inline bool IsVisible() const { return visible_; }
 
    void Wrap() { wrapped = true; }
+   inline bool IsWrapped() const { return wrapped; }
 
-   bool IsWrapped() const { return wrapped; }
-
-   int16_t Center() const { return (end - start) / 2; }
-
-   uint16_t Length() const { return end - start + 1; }
+   inline int16_t Center() const { return (end - start) / 2; }
+   inline uint16_t Length() const { return end - start + 1; }
 
    void Slide(int16_t increment) {
       int16_t length = Length();
@@ -56,6 +59,21 @@ class AbstractLinearRange {
          start = center - (length / 2);
          end = center + (length / 2) + (length % 2);
          break;
+      }
+   }
+
+   void SetPosition(int16_t position, AnchorType anchor_type = FRONT) {
+      auto length = Length();
+      switch (anchor_type) {
+      case FRONT:
+         start = position;
+         end = position + length - 1;
+      case TAIL:
+         end = position;
+         start = end - length + 1;
+      case CENTER:
+         start = position - length / 2;
+         end = start + length - 1;
       }
    }
 
