@@ -34,12 +34,12 @@ void setup() {
    *background =
        LinearRange(0, RANGE_MAX, [](uint16_t curr, uint16_t total) -> Pixel {
           // Alternate white and pink every 4 pixels.
-          return ((curr / 4) % 2) ? Pixel{50, 0, 42} : Pixel{50, 50, 50};
+          return ((curr / 4) % 2) ? Pixel{50, 0, 42} : WHITE;
        });
    *lower_half =
-       LinearRange::Gradient(0, initial_length - 1, {50, 0, 0}, {0, 50, 0});
+       LinearRange::Gradient(0, initial_length - 1, RED, GREEN);
    *upper_half = LinearRange::Gradient(initial_length, 2 * initial_length - 1,
-                                       {0, 50, 0}, {0, 0, 50});
+                                       GREEN, BLUE);
 
    lower_half->Wrap();
    upper_half->Wrap();

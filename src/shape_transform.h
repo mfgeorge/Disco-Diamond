@@ -5,6 +5,8 @@
 #include "ledstrip.h"
 #include "pattern.h"
 
+#define DEBUG 0
+
 class VerticalShapeTransform {
  public:
    bool NormalizeRange(const LinearRange& range,
@@ -37,6 +39,10 @@ class VerticalShapeTransform {
       *normalized_range = range;
       normalized_range->start = normalized_start;
       normalized_range->end = normalized_end;
+#if DEBUG
+      Serial.printf("...normalized to (%d, %d)...", normalized_start,
+                    normalized_end);
+#endif
       return true;
    }
 
@@ -52,21 +58,32 @@ class VerticalShapeTransform {
          return;
       }
 
-      uint16_t start_pixel =
+      int16_t start_pixel =
           (hw_pixel_count * normalized_range.start) / RANGE_MAX;
-      uint16_t end_pixel = (hw_pixel_count * normalized_range.end) / RANGE_MAX;
-
+      int16_t end_pixel = (hw_pixel_count * normalized_range.end) / RANGE_MAX;
+#if DEBUG
+      Serial.printf("...mapped to pixels [%d, %d]/%d...", start_pixel,
+                    end_pixel, hw_pixel_count);
+#endif
       if (end_pixel < start_pixel) {
          // This should never happen.
          Serial.println("ERROR: Start pixel was greater than end pixel.");
          return;
       }
 
+#if DEBUG
+      Serial.printf("...trimmed to pixels [%d, %d]/%d...", start_pixel,
+                    end_pixel, hw_pixel_count);
+#endif
+
       uint16_t pixels_to_draw = end_pixel - start_pixel + 1;
-      for (uint16_t p = start_pixel; p <= end_pixel; p++) {
+      for (int16_t p = start_pixel; p <= end_pixel; p++) {
          hw_pixels[p % hw_pixel_count] =
              range.color_generator(p - start_pixel, pixels_to_draw);
       }
+#if DEBUG
+      Serial.printf("...success...");
+#endif
    }
 
    void Transform(const PatternFrame* patternFrame, HwFrame* hwFrame) {
@@ -77,6 +94,11 @@ class VerticalShapeTransform {
          memset(hw_pixels, 0, hw_pixel_count * sizeof(Pixel));
          const PatternDimension* curr_dimension = &patternFrame->dimensions[0];
          for (int r = 0; r < curr_dimension->rangeCount; r++) {
+#if DEBUG
+            Serial.printf("\r\ndrawing layer %d from %d to %d...", r,
+                          curr_dimension->ranges[r].start,
+                          curr_dimension->ranges[r].end);
+#endif
             DrawRange(curr_dimension->ranges[r], hw_pixels, hw_pixel_count);
          }
       }

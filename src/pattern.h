@@ -37,12 +37,17 @@ class AbstractLinearRange {
    void Wrap() { wrapped = true; }
    inline bool IsWrapped() const { return wrapped; }
 
+   inline int16_t Start() const { return start; }
+   inline int16_t End() const { return end; }
    inline int16_t Center() const { return (end - start) / 2; }
    inline uint16_t Length() const { return end - start + 1; }
 
    void Slide(int16_t increment) {
       int16_t length = Length();
-      start = (start + increment) % RANGE_MAX;
+      start = start + increment;
+      if (wrapped) {
+         start = start % RANGE_MAX;
+      }
       end = start + length - 1;
    }
 

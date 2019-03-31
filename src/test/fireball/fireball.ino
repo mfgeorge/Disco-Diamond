@@ -7,8 +7,10 @@
 
 #define MAX_SPARKLES 15
 
-Adafruit_NeoPixel strip[] = {Adafruit_NeoPixel(144, PIN1)};
-HwFrame hwFrame(strip, 1);
+Adafruit_NeoPixel strip[] = {
+    Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN1),
+    Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN1)};
+HwFrame hwFrame(strip, 4);
 PatternFrame pFrame;
 VerticalShapeTransform transform;
 
@@ -36,7 +38,7 @@ class Fireball {
                                case 1:
                                   return RED;
                                default:
-                                  return Pixel{255, 155, 0};
+                                  return Pixel{0, 0, 0};
                                };
                             });
       *flame_ = LinearRange::Gradient(1 * tail_length / 4 + 1, tail_length,
@@ -82,7 +84,7 @@ void setup() {
    pinMode(PIN4, OUTPUT);
 
    Serial.begin(115200);
-   strip[0].setBrightness(100);
+   strip[0].setBrightness(80);
 
    auto* dimension = pFrame.AddDimension();
 
@@ -90,9 +92,10 @@ void setup() {
       sparkles[i].range = dimension->AddLayer();
       *(sparkles[i].range) = LinearRange::SolidColor(0, 0, YELLOW);
    }
-   fireball_distance = random(4000, 8000);
+   fireball_distance = random(2000, 4000);
    fireball = Fireball(dimension->AddLayer(), dimension->AddLayer(),
                        dimension->AddLayer(), dimension->AddLayer());
+   fireball.ResetPosition();
 
    transform.Transform(&pFrame, &hwFrame);
    hwFrame.draw();
@@ -111,24 +114,28 @@ Sparkle* FindSparkleSlot() {
 void loop() {
    unsigned long start_time = millis();
 
+   // If the new sparkle countdown reached zero, try to create a new sparkle.
    if (new_sparkle == 0) {
       auto* sparkle = FindSparkleSlot();
       if (sparkle) {
          sparkle->range->SetPosition(random(0, RANGE_MAX));
-         sparkle->range->SetAbsoluteLength(random(4, 6));
+         sparkle->range->SetAbsoluteLength(random(4, 8));
          sparkle->lifespan = random(60, 120);
          sparkle->range->SetVisible(true);
       }
+      // Reset sparkle counter
       new_sparkle = random(10, 40);
    } else {
       new_sparkle--;
    }
 
+   // For every existing sparkle, decrement its lifespan.
    for (int i = 0; i < MAX_SPARKLES; i++) {
       auto& sparkle = sparkles[i];
       if (sparkle.lifespan > 0) {
          sparkle.lifespan--;
       } else {
+         // If the sparkle is dead, set invisible.
          sparkle.range->SetVisible(false);
       }
    }
@@ -136,7 +143,7 @@ void loop() {
    if (fireball.smoke_->start > fireball_distance) {
       // reset fireball
       fireball.ResetPosition();
-      fireball_distance = random(4000, 8000);
+      fireball_distance = random(2000, 4000);
    } else {
       fireball.Slide(5);
    }

@@ -18,15 +18,13 @@ ColorGenerator GradientGenerator(const Pixel& start_color,
                                  const Pixel& end_color) {
    return [start_color, end_color](uint16_t curr_point,
                                    uint16_t max_points) -> Pixel {
-      return {start_color.red +
-                  ((end_color.red - start_color.red) * curr_point) /
-                      (max_points - 1),
-              start_color.green +
-                  ((end_color.green - start_color.green) * curr_point) /
-                      (max_points - 1),
-              start_color.blue +
-                  ((end_color.blue - start_color.blue) * curr_point) /
-                      (max_points - 1)};
+      return {
+          start_color.red +
+              ((end_color.red - start_color.red) * curr_point) / max_points,
+          start_color.green +
+              ((end_color.green - start_color.green) * curr_point) / max_points,
+          start_color.blue +
+              ((end_color.blue - start_color.blue) * curr_point) / max_points};
    };
 }
 
