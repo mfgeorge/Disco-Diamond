@@ -96,8 +96,7 @@ class AbstractLinearRange {
 
 class LinearRange : public AbstractLinearRange {
  public:
-   Pixel start_color;
-   Pixel end_color;
+   bool dithered;
    ColorGenerator color_generator;
 
    // Creates a solid color range.
@@ -117,7 +116,11 @@ class LinearRange : public AbstractLinearRange {
    // Generates colors along the parent dimension from start to end using
    // color_generator.
    LinearRange(int16_t start, int16_t end, ColorGenerator color_generator)
-       : AbstractLinearRange(start, end), color_generator(color_generator) {}
+       : AbstractLinearRange(start, end), dithered(false),
+         color_generator(color_generator) {}
+
+   inline bool Dithered() const { return dithered; }
+   void EnableDithering() { dithered = true; }
 };
 
 class PatternDimension {

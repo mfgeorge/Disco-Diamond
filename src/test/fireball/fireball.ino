@@ -8,8 +8,8 @@
 #define MAX_SPARKLES 15
 
 Adafruit_NeoPixel strip[] = {
-    Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN1),
-    Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN1)};
+    Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN2),
+    Adafruit_NeoPixel(42, PIN3), Adafruit_NeoPixel(42, PIN4)};
 HwFrame hwFrame(strip, 4);
 PatternFrame pFrame;
 VerticalShapeTransform transform;
@@ -84,8 +84,6 @@ void setup() {
    pinMode(PIN4, OUTPUT);
 
    Serial.begin(115200);
-   strip[0].setBrightness(80);
-
    auto* dimension = pFrame.AddDimension();
 
    for (int i = 0; i < MAX_SPARKLES; i++) {

@@ -1,11 +1,14 @@
 #include <Adafruit_NeoPixel.h>
+#include <colors.h>
 #include <ledstrip.h>
 #include <pattern.h>
 #include <pins.h>
 #include <shape_transform.h>
 
-Adafruit_NeoPixel strip[] = {Adafruit_NeoPixel(144, PIN1)};
-HwFrame hwFrame(strip, 1);
+Adafruit_NeoPixel strip[] = {
+    Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN2),
+    Adafruit_NeoPixel(42, PIN3), Adafruit_NeoPixel(42, PIN4)};
+HwFrame hwFrame(strip, 4);
 PatternFrame pFrame;
 VerticalShapeTransform transform;
 
@@ -20,7 +23,6 @@ void setup() {
    pinMode(PIN4, OUTPUT);
 
    Serial.begin(115200);
-   strip[0].setBrightness(100);
 
    // initial settings for pattern frame
    auto* dimension = pFrame.AddDimension();
@@ -28,21 +30,22 @@ void setup() {
    lower_half = dimension->AddLayer();
    upper_half = dimension->AddLayer();
 
-   uint16_t initial_length = 200;
+   uint16_t initial_length = 70;
    // Populate the pattern frame
    // Background stretches across the whole dimension.
    *background =
        LinearRange(0, RANGE_MAX, [](uint16_t curr, uint16_t total) -> Pixel {
           // Alternate white and pink every 4 pixels.
-          return ((curr / 4) % 2) ? Pixel{50, 0, 42} : WHITE;
+          return (curr % 2) ? Pixel{3, 0, 2} : Pixel{1,1,1};
        });
-   *lower_half =
-       LinearRange::Gradient(0, initial_length - 1, RED, GREEN);
+   *lower_half = LinearRange::Gradient(0, initial_length - 1, RED, GREEN);
    *upper_half = LinearRange::Gradient(initial_length, 2 * initial_length - 1,
                                        GREEN, BLUE);
 
    lower_half->Wrap();
    upper_half->Wrap();
+   lower_half->EnableDithering();
+   upper_half->EnableDithering();
 
    transform.Transform(&pFrame, &hwFrame);
    hwFrame.draw();
@@ -53,8 +56,8 @@ bool growing = true;
 void loop() {
    unsigned long start_time = millis();
 
-   lower_half->Slide(5);
-   upper_half->Slide(5);
+   lower_half->Slide(3);
+   upper_half->Slide(3);
 
    uint16_t length = lower_half->Length();
    if (length > 420) {
