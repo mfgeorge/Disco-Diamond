@@ -30,15 +30,20 @@ void setup() {
    lower_half = dimension->AddLayer();
    upper_half = dimension->AddLayer();
 
+   background->EnableGammaCorrection();
+   lower_half->EnableGammaCorrection();
+   upper_half->EnableGammaCorrection();
+
    uint16_t initial_length = 70;
    // Populate the pattern frame
    // Background stretches across the whole dimension.
    *background =
        LinearRange(0, RANGE_MAX, [](uint16_t curr, uint16_t total) -> Pixel {
           // Alternate white and pink every 4 pixels.
-          return (curr % 2) ? Pixel{3, 0, 2} : Pixel{1,1,1};
+          return (curr % 2) ? Pixel{100, 0, 66} : Pixel{50,50,50};
        });
-   *lower_half = LinearRange::Gradient(0, initial_length - 1, RED, GREEN);
+   // Slightly overlap ranges
+   *lower_half = LinearRange::Gradient(0, initial_length + 10, RED, GREEN);
    *upper_half = LinearRange::Gradient(initial_length, 2 * initial_length - 1,
                                        GREEN, BLUE);
 

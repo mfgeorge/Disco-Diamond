@@ -13,8 +13,7 @@ PatternFrame pFrame;
 VerticalShapeTransform transform;
 
 LinearRange* range;
-Pixel color = {64, 224, 208};
-uint16_t pos = 0;
+uint16_t hue = 0;
 
 void setup() {
    pinMode(PIN1, OUTPUT);
@@ -28,26 +27,22 @@ void setup() {
    auto* dimension = pFrame.AddDimension();
    range = dimension->AddLayer();
    range->EnableGammaCorrection();
-   
 
    *range =
        LinearRange(0, RANGE_MAX, [](uint16_t curr, uint16_t total) -> Pixel {
-          // Color every 3rd pixel, starting with pos
-          return (curr % 3 == pos) ? color : Pixel{0,0,0};
+          int h = hue + (curr * 65536L / total);
+          return HSVToRGB(h);
        });
 
    transform.Transform(&pFrame, &hwFrame);
    hwFrame.draw();
 }
 
-#define DELAY 50UL
+#define DELAY 0UL
 bool growing = true;
 void loop() {
    unsigned long start_time = millis();
-
-   pos = (pos + 1) % 3;
-
-
+   hue = (hue + 256) % (5*65536);
    transform.Transform(&pFrame, &hwFrame);
    hwFrame.draw();
 

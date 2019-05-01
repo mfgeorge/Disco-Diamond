@@ -4,6 +4,7 @@
 #include "Arduino.h"
 #include "ledstrip.h"
 #include "pattern.h"
+#include "color_util.h"
 
 #define DEBUG 0
 
@@ -117,6 +118,11 @@ class VerticalShapeTransform {
          for (uint16_t p = start_pixel; p <= end_pixel; p++) {
             hw_pixels[p % hw_pixel_count] =
                 range.color_generator(p - start_pixel, pixels_to_draw);
+         }
+      }
+      if (range.UseGammaCorrection()) {
+         for (uint16_t p = start_pixel; p <= end_pixel; p++) {
+            hw_pixels[p % hw_pixel_count] = gamma(hw_pixels[p % hw_pixel_count]);
          }
       }
 #if DEBUG

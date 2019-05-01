@@ -97,6 +97,7 @@ class AbstractLinearRange {
 class LinearRange : public AbstractLinearRange {
  public:
    bool dithered;
+   bool gamma_correction_;
    ColorGenerator color_generator;
 
    // Creates a solid color range.
@@ -121,6 +122,14 @@ class LinearRange : public AbstractLinearRange {
 
    inline bool Dithered() const { return dithered; }
    void EnableDithering() { dithered = true; }
+
+   void EnableGammaCorrection() {
+      gamma_correction_ = true;
+   }
+
+   inline bool UseGammaCorrection() const {
+      return gamma_correction_;
+   }
 };
 
 class PatternDimension {
