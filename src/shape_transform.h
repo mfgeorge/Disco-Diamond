@@ -43,8 +43,11 @@ class VerticalShapeTransform {
          }
          // If we are not wrapping, trim range to bounds.
          normalized_start = normalized_start < 0 ? 0 : normalized_start;
-         normalized_end =
-             normalized_end > RANGE_MAX ? RANGE_MAX : normalized_end;
+         if (normalized_end < 0) {
+            normalized_end = 0;
+         } else if (normalized_end > RANGE_MAX) {
+            normalized_end = RANGE_MAX;
+         }
       }
       *normalized_range = range;
       normalized_range->start = normalized_start;
