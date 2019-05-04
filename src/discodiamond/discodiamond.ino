@@ -4,6 +4,7 @@
 #include <pattern.h>
 #include <pins.h>
 #include <shape_transform.h>
+#include <patterns/rainbow_glow.h>
 
 Adafruit_NeoPixel strip[] = {
     Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN2),
@@ -12,8 +13,7 @@ HwFrame hwFrame(strip, 4);
 PatternFrame pFrame;
 VerticalShapeTransform transform;
 
-LinearRange* range;
-uint16_t hue = 0;
+RainbowGlowPattern pattern;
 
 void setup() {
    pinMode(PIN1, OUTPUT);
@@ -23,31 +23,19 @@ void setup() {
 
    Serial.begin(115200);
 
-   // initial settings for pattern frame
-   auto* dimension = pFrame.AddDimension();
-   range = dimension->AddLayer();
-
-   *range =
-       LinearRange(0, RANGE_MAX, [](uint16_t curr, uint16_t total) -> Pixel {
-          int h = hue + (curr * 65536L / total);
-          return HSVToRGB(h);
-       });
-   range->EnableGammaCorrection();
-
-   transform.Transform(&pFrame, &hwFrame);
-   hwFrame.draw();
+   pattern.init(&pFrame);
 }
 
-#define DELAY 0UL
-bool growing = true;
 void loop() {
    unsigned long start_time = millis();
-   hue = (hue + 256) % (5*65536);
+   pattern.step();
+
    transform.Transform(&pFrame, &hwFrame);
    hwFrame.draw();
 
    unsigned long render_time = millis() - start_time;
-   if (render_time < DELAY) {
-      delay(DELAY - render_time);
+   unsigned long frame_delay = pattern.frame_delay(); 
+   if (render_time < frame_delay) {
+      delay(frame_delay - render_time);
    }
 }

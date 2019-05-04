@@ -142,6 +142,10 @@ class PatternDimension {
       rangeCount++;
       return &ranges[new_range_index];
    }
+
+   void ClearLayers() {
+      rangeCount = 0;
+   }
 };
 
 class PatternFrame {
@@ -152,8 +156,24 @@ class PatternFrame {
    PatternDimension* AddDimension() {
       uint8_t new_dimension_index = activeDimensions;
       activeDimensions++;
+      dimensions[new_dimension_index].ClearLayers();
       return &dimensions[new_dimension_index];
    }
+
+   void ClearDimensions() {
+      activeDimensions = 0;
+   }
+};
+
+class Pattern {
+   // Move the pattern forward one step
+   virtual void step() = 0;
+
+   // Prepare to draw on the specified pattern_frame
+   virtual void init(PatternFrame* pattern_frame) = 0;
+   
+   // Delay in ms between frames
+   virtual uint16_t frame_delay() = 0;
 };
 
 #endif
