@@ -15,4 +15,6 @@
    Pixel { 255, 255, 255 }
 #define TURQUOISE                                                              \
    Pixel { 64, 224, 208 }
+#define BLACK 																   \
+   Pixel {0, 0, 0}
 #endif
