@@ -166,6 +166,7 @@ class PatternFrame {
 };
 
 class Pattern {
+ public:
    // Move the pattern forward one step
    virtual void step() = 0;
 
