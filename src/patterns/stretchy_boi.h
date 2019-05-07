@@ -3,7 +3,10 @@
 
 class StretchyBoiPattern : public Pattern {
  public:
-   StretchyBoiPattern() : growing(true) {}
+   // Two part version
+   StretchyBoiPattern(Pixel color1, Pixel color2)  : gradient(false), growing(true), color1_(color1), color2_(color2) {}
+   // Gradient version
+   StretchyBoiPattern(Pixel color1, Pixel color2, Pixel color3)  : gradient(true), growing(true),  color1_(color1), color2_(color2), color3_(color3) {}
 
    void init(PatternFrame* pattern_frame) override {
       auto* dimension = pattern_frame->AddDimension();
@@ -20,14 +23,20 @@ class StretchyBoiPattern : public Pattern {
              return (curr % 2) ? Pixel{100, 0, 66} : Pixel{50, 50, 50};
           });
       // Slightly overlap ranges
-      *lower_half = LinearRange::Gradient(0, initial_length + 10, RED, GREEN);
-      *upper_half = LinearRange::Gradient(initial_length,
-                                          2 * initial_length - 1, GREEN, BLUE);
+      if (gradient) {
+         *lower_half =
+             LinearRange::Gradient(0, initial_length + 10, color1_, color2_);
+         *upper_half = LinearRange::Gradient(
+             initial_length, 2 * initial_length - 1, color2_, color3_);
+      } else {
+         *lower_half =
+             LinearRange::SolidColor(0, initial_length + 10, color1_);
+         *upper_half = LinearRange::SolidColor(initial_length,
+                                               2 * initial_length - 1, color2_);
+      }
 
       lower_half->Wrap();
       upper_half->Wrap();
-      lower_half->EnableDithering();
-      upper_half->EnableDithering();
       lower_half->EnableGammaCorrection();
       upper_half->EnableGammaCorrection();
       background->EnableGammaCorrection();
@@ -56,6 +65,10 @@ class StretchyBoiPattern : public Pattern {
    uint16_t frame_delay() override { return 12UL; }
 
  private:
+   Pixel color1_;
+   Pixel color2_;
+   Pixel color3_;
+   bool gradient;
    LinearRange* background;
    LinearRange* lower_half;
    LinearRange* upper_half;

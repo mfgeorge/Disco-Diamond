@@ -75,4 +75,8 @@ Pixel HSVToRGB(uint16_t hue, uint8_t sat = 255, uint8_t val = 255) {
            ((((b * s1) >> 8) + s2) * v1) >> 8};
 }
 
+uint16_t HueInDegrees(uint16_t degrees) {
+   return degrees * 65535 / 360;
+}
+
 #endif

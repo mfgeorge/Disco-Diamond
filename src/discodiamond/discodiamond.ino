@@ -7,8 +7,11 @@
 #include <patterns/rainbow_glow.h>
 #include <patterns/theater_chase.h>
 #include <patterns/stretchy_boi.h>
+#include <patterns/rainbow_sparkle.h>
+#include <patterns/pong.h>
+#include <patterns/glow.h>
 
-#define PATTERN_DURATION_SEC 5
+#define PATTERN_DURATION_SEC 10
 
 Adafruit_NeoPixel strip[] = {
     Adafruit_NeoPixel(42, PIN1), Adafruit_NeoPixel(42, PIN2),
@@ -19,7 +22,12 @@ VerticalShapeTransform transform;
 
 RainbowGlowPattern rainbow_glow;
 TheaterChasePattern theater_chase;
-StretchyBoiPattern stretchy_boi;
+StretchyBoiPattern stretchy_boi(RED, GREEN, BLUE);
+StretchyBoiPattern stretchy_boi2(TURQUOISE, PINK);
+RainbowSparklePattern rainbow_sparkle;
+PongPattern pong(4, 8, 20, 2, 0, RANGE_MAX);
+StretchyBoiPattern stretchy_boi3(BLACK, BLACK);
+GlowPattern glow1(HueInDegrees(180), HueInDegrees(300));
 
 class PatternSwitcher {
  public:
@@ -47,6 +55,14 @@ class PatternSwitcher {
       curr_pattern_->init(&pFrame);
    }
 
+   void PrevPattern() {
+      pFrame.ClearDimensions();
+      pattern_index_ = (pattern_index_ - 1) % total_patterns_;
+      curr_pattern_ = patterns[pattern_index_];
+      pattern_start_time_ = millis();
+      curr_pattern_->init(&pFrame);
+   }
+
    private:
       Pattern* patterns[20];
       unsigned long pattern_start_time_;
@@ -68,6 +84,11 @@ void setup() {
    pattern_switcher.AddPattern(&rainbow_glow);
    pattern_switcher.AddPattern(&theater_chase);
    pattern_switcher.AddPattern(&stretchy_boi);
+   pattern_switcher.AddPattern(&rainbow_sparkle);
+   pattern_switcher.AddPattern(&stretchy_boi2);
+   // pattern_switcher.AddPattern(&pong);
+   pattern_switcher.AddPattern(&stretchy_boi3);
+   pattern_switcher.AddPattern(&glow1);
    pattern_switcher.NextPattern();
 }
 
@@ -87,9 +108,17 @@ void draw() {
 
 void loop() {
    unsigned long now = millis();
-   Serial.printf("now %d, start time %d\r\n", now, pattern_switcher.PatternStartTime());
-   if (now > pattern_switcher.PatternStartTime() + PATTERN_DURATION_SEC * 1000) {
-      pattern_switcher.NextPattern();
+   // Serial.printf("now %d, start time %d\r\n", now, pattern_switcher.PatternStartTime());
+   // if (now > pattern_switcher.PatternStartTime() + PATTERN_DURATION_SEC * 1000) {
+   //    pattern_switcher.NextPattern();
+   // }
+   if (Serial.available() > 0) {
+      auto c = Serial.read();
+      if (c == 'n') {
+         pattern_switcher.NextPattern();
+      } else if (c == 'b') {
+         pattern_switcher.PrevPattern();
+      }
    }
 
    draw();
