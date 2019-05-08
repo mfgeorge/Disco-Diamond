@@ -74,6 +74,8 @@ class PatternSwitcher {
 PatternSwitcher pattern_switcher;
 
 void setup() {
+   ESP.wdtDisable();
+   
    pinMode(PIN1, OUTPUT);
    pinMode(PIN2, OUTPUT);
    pinMode(PIN3, OUTPUT);
