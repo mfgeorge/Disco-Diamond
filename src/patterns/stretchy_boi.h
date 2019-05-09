@@ -1,12 +1,20 @@
 #include "colors.h"
 #include "pattern.h"
+#include "color_util.h"
 
 class StretchyBoiPattern : public Pattern {
  public:
    // Two part version
-   StretchyBoiPattern(Pixel color1, Pixel color2)  : gradient(false), growing(true), color1_(color1), color2_(color2) {}
-   // Gradient version
-   StretchyBoiPattern(Pixel color1, Pixel color2, Pixel color3)  : gradient(true), growing(true),  color1_(color1), color2_(color2), color3_(color3) {}
+   StretchyBoiPattern(Pixel color1, Pixel color2)
+       : growing(true), color1_(color1), color2_(color2), bg_color1_(WHITE),
+         bg_color2_(PINK) {}
+
+   virtual void initRanges(uint16_t initial_length) {
+      *lower_half = LinearRange(0, initial_length + 10,
+                                [this](uint16_t, uint16_t) { return color1_; });
+      *upper_half = LinearRange(initial_length, 2 * initial_length - 1,
+                                [this](uint16_t, uint16_t) { return color2_; });
+   }
 
    void init(PatternFrame* pattern_frame) override {
       auto* dimension = pattern_frame->AddDimension();
@@ -18,28 +26,28 @@ class StretchyBoiPattern : public Pattern {
       // Populate the pattern frame
       // Background stretches across the whole dimension.
       *background =
-          LinearRange(0, RANGE_MAX, [](uint16_t curr, uint16_t total) -> Pixel {
+          LinearRange(0, RANGE_MAX, [this](uint16_t curr, uint16_t total) -> Pixel {
              // Alternate white and pink every 4 pixels.
-             return (curr % 2) ? Pixel{100, 0, 66} : Pixel{50, 50, 50};
+             return (curr % 2) ? bg_color1_ : bg_color2_;
           });
       // Slightly overlap ranges
-      if (gradient) {
-         *lower_half =
-             LinearRange::Gradient(0, initial_length + 10, color1_, color2_);
-         *upper_half = LinearRange::Gradient(
-             initial_length, 2 * initial_length - 1, color2_, color3_);
-      } else {
-         *lower_half =
-             LinearRange::SolidColor(0, initial_length + 10, color1_);
-         *upper_half = LinearRange::SolidColor(initial_length,
-                                               2 * initial_length - 1, color2_);
-      }
+      initRanges(initial_length);
 
       lower_half->Wrap();
       upper_half->Wrap();
       lower_half->EnableGammaCorrection();
       upper_half->EnableGammaCorrection();
       background->EnableGammaCorrection();
+   }
+
+   void setColors(Pixel c1, Pixel c2) {
+      color1_ = c1;
+      color2_ = c2;
+   }
+
+   void setBackground(Pixel c1, Pixel c2) {
+      bg_color1_ = DimColor(c1, 20);
+      bg_color2_ = DimColor(c2, 20);
    }
 
    void step() override {
@@ -64,13 +72,29 @@ class StretchyBoiPattern : public Pattern {
 
    uint16_t frame_delay() override { return 12UL; }
 
- private:
+ protected:
    Pixel color1_;
    Pixel color2_;
-   Pixel color3_;
-   bool gradient;
+   Pixel bg_color1_;
+   Pixel bg_color2_;
    LinearRange* background;
    LinearRange* lower_half;
    LinearRange* upper_half;
    bool growing;
+};
+
+class GradientStretchyBoi : public StretchyBoiPattern {
+ public:
+   GradientStretchyBoi(Pixel color1, Pixel color2, Pixel color3)
+       : StretchyBoiPattern(color1, color2), color3_(color3) {}
+
+   void initRanges(uint16_t initial_length) override {
+      *lower_half =
+          LinearRange::Gradient(0, initial_length + 10, color1_, color2_);
+      *upper_half = LinearRange::Gradient(
+          initial_length, 2 * initial_length - 1, color2_, color3_);
+   }
+
+ private:
+   Pixel color3_;
 };

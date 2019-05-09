@@ -4,6 +4,7 @@
 #include <pattern.h>
 #include <pins.h>
 #include <shape_transform.h>
+#include <color_picker.h>
 #include <patterns/rainbow_glow.h>
 #include <patterns/theater_chase.h>
 #include <patterns/stretchy_boi.h>
@@ -11,6 +12,7 @@
 #include <patterns/pong.h>
 #include <patterns/glow.h>
 #include <patterns/slide_expand.h>
+#include <patterns/rasta.h>
 
 #define PATTERN_DURATION_SEC 10
 
@@ -23,14 +25,22 @@ VerticalShapeTransform transform;
 
 RainbowGlowPattern rainbow_glow;
 TheaterChasePattern theater_chase;
-StretchyBoiPattern stretchy_boi(RED, GREEN, BLUE);
-StretchyBoiPattern stretchy_boi2(TURQUOISE, PINK);
+GradientStretchyBoi rainbow_stretchy_boi(RED, GREEN, BLUE);
+
+StretchyBoiPattern stretchy_boi_dark(BLACK, BLACK);
+StretchyBoiPattern stretchy_boi_color(TURQUOISE, PINK);
+
 RainbowSparklePattern rainbow_sparkle;
+
 PongPattern pong(4, 8, 20, 2, 0, RANGE_MAX);
-StretchyBoiPattern stretchy_boi3(BLACK, BLACK);
 GlowPattern glow1(HueInDegrees(180), HueInDegrees(300));
+
+RastaTheaterChase rasta_chase;
+
 SlideExpandPattern slide_expand;
 RainbowTheaterChase rainbow_chase;
+
+Rasta rasta;
 
 class PatternSwitcher {
  public:
@@ -53,9 +63,13 @@ class PatternSwitcher {
    void NextPattern() {
       pFrame.ClearDimensions();
       pattern_index_ = (pattern_index_ + 1) % total_patterns_;
+      if (pattern_index_ == 0) {
+         pattern_looped_hook_();
+      }
       curr_pattern_ = patterns[pattern_index_];
       pattern_start_time_ = millis();
       curr_pattern_->init(&pFrame);
+
    }
 
    void PrevPattern() {
@@ -70,15 +84,33 @@ class PatternSwitcher {
       curr_pattern_->init(&pFrame);
    }
 
+   void setPatternLoopedHook(std::function<void()> pattern_looped_hook) {
+      pattern_looped_hook_ = pattern_looped_hook;
+   }
+
    private:
       Pattern* patterns[20];
       unsigned long pattern_start_time_;
       int pattern_index_;
       int total_patterns_;
       Pattern* curr_pattern_;
+
+      std::function<void()> pattern_looped_hook_;
 };
 
+int RandomHue() {
+   return random(0,360);
+}
+
 PatternSwitcher pattern_switcher;
+
+void PatternLoopedHook() {
+   // Change the colors up for stretchy bois
+   Square s = MakeSquare(RandomHue());
+   stretchy_boi_dark.setBackground(s.colors[1], s.colors[3]);
+   stretchy_boi_color.setColors(s.colors[0], s.colors[2]);
+   stretchy_boi_color.setBackground(s.colors[1], s.colors[3]);
+}
 
 void nextPattern(){
    noInterrupts();
@@ -107,17 +139,22 @@ void setup() {
 
    Serial.begin(115200);
 
+   pattern_switcher.setPatternLoopedHook(PatternLoopedHook);
    pattern_switcher.AddPattern(&rainbow_glow);
+   pattern_switcher.AddPattern(&rainbow_stretchy_boi);
    pattern_switcher.AddPattern(&theater_chase);
-   pattern_switcher.AddPattern(&stretchy_boi);
    pattern_switcher.AddPattern(&rainbow_sparkle);
-   pattern_switcher.AddPattern(&stretchy_boi2);
+   pattern_switcher.AddPattern(&stretchy_boi_dark);
+   pattern_switcher.AddPattern(&stretchy_boi_color);
    pattern_switcher.AddPattern(&pong);
-   pattern_switcher.AddPattern(&stretchy_boi3);
    pattern_switcher.AddPattern(&glow1);
    pattern_switcher.AddPattern(&slide_expand);
    pattern_switcher.AddPattern(&rainbow_chase);
+   pattern_switcher.AddPattern(&rasta);
+   pattern_switcher.AddPattern(&rasta_chase);
    pattern_switcher.NextPattern();
+
+   rainbow_stretchy_boi.setBackground(WHITE, PINK);
 }
 
 void draw() {
@@ -134,7 +171,15 @@ void draw() {
    }
 }
 
+uint16_t wdt = 0;
+
 void loop() {
+   // Feed the watchdog every 500 frames
+   wdt = (wdt + 1) % 500;
+   if (wdt == 0) {
+      ESP.wdtFeed();
+   }
+
    unsigned long now = millis();
    // Serial.printf("now %d, start time %d\r\n", now, pattern_switcher.PatternStartTime());
    // if (now > pattern_switcher.PatternStartTime() + PATTERN_DURATION_SEC * 1000) {

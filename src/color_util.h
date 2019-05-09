@@ -79,4 +79,8 @@ uint16_t HueInDegrees(uint16_t degrees) {
    return degrees * 65535 / 360;
 }
 
+Pixel DimColor(Pixel color, int dim_percent) {
+   return {color.red * dim_percent / 100, color.green * dim_percent / 100, color.blue * dim_percent / 100};
+}
+
 #endif

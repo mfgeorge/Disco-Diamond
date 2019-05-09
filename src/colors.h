@@ -2,7 +2,7 @@
 #define COLORS_H
 
 #define YELLOW                                                                 \
-   Pixel { 255, 255, 0 }
+   Pixel { 255, 180, 0 }
 #define RED                                                                    \
    Pixel { 255, 0, 0 }
 #define GREEN                                                                  \
