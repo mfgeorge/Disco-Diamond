@@ -10,6 +10,7 @@
 #include <patterns/rainbow_sparkle.h>
 #include <patterns/pong.h>
 #include <patterns/glow.h>
+#include <patterns/slide_expand.h>
 
 #define PATTERN_DURATION_SEC 10
 
@@ -28,6 +29,8 @@ RainbowSparklePattern rainbow_sparkle;
 PongPattern pong(4, 8, 20, 2, 0, RANGE_MAX);
 StretchyBoiPattern stretchy_boi3(BLACK, BLACK);
 GlowPattern glow1(HueInDegrees(180), HueInDegrees(300));
+SlideExpandPattern slide_expand;
+RainbowTheaterChase rainbow_chase;
 
 class PatternSwitcher {
  public:
@@ -57,7 +60,11 @@ class PatternSwitcher {
 
    void PrevPattern() {
       pFrame.ClearDimensions();
-      pattern_index_ = (pattern_index_ - 1) % total_patterns_;
+      if(pattern_index_ == 0) {
+         pattern_index_ = total_patterns_ - 1;
+      } else {
+         pattern_index_--;
+      }
       curr_pattern_ = patterns[pattern_index_];
       pattern_start_time_ = millis();
       curr_pattern_->init(&pFrame);
@@ -73,13 +80,30 @@ class PatternSwitcher {
 
 PatternSwitcher pattern_switcher;
 
+void nextPattern(){
+   noInterrupts();
+   pattern_switcher.NextPattern();
+   interrupts();
+}
+
+void prevPattern(){
+   noInterrupts();
+   pattern_switcher.PrevPattern();
+   interrupts();
+}
+
 void setup() {
    ESP.wdtDisable();
-   
+
    pinMode(PIN1, OUTPUT);
    pinMode(PIN2, OUTPUT);
    pinMode(PIN3, OUTPUT);
    pinMode(PIN4, OUTPUT);
+   pinMode(BUTTON_1, INPUT_PULLUP);
+   pinMode(BUTTON_2, INPUT_PULLUP);
+
+   attachInterrupt(digitalPinToInterrupt(BUTTON_1), nextPattern, FALLING);
+   attachInterrupt(digitalPinToInterrupt(BUTTON_2), prevPattern, FALLING);
 
    Serial.begin(115200);
 
@@ -88,9 +112,11 @@ void setup() {
    pattern_switcher.AddPattern(&stretchy_boi);
    pattern_switcher.AddPattern(&rainbow_sparkle);
    pattern_switcher.AddPattern(&stretchy_boi2);
-   // pattern_switcher.AddPattern(&pong);
+   pattern_switcher.AddPattern(&pong);
    pattern_switcher.AddPattern(&stretchy_boi3);
    pattern_switcher.AddPattern(&glow1);
+   pattern_switcher.AddPattern(&slide_expand);
+   pattern_switcher.AddPattern(&rainbow_chase);
    pattern_switcher.NextPattern();
 }
 
