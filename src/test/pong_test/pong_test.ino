@@ -14,8 +14,8 @@ PatternFrame pFrame;
 VerticalShapeTransform transform;
 
 
-PongPattern pattern1(2, 4, 11, 0, 0, RANGE_MAX/2);
-PongPattern pattern2(2, 4, 11, 2, RANGE_MAX/2, RANGE_MAX);
+RainbowPongPattern pattern1(2, 4, 11, 0, 0, RANGE_MAX/2);
+RainbowPongPattern pattern2(2, 4, 11, 2, RANGE_MAX/2, RANGE_MAX);
 
 void setup() {
    pinMode(PIN1, OUTPUT);

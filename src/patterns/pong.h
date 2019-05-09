@@ -1,6 +1,11 @@
 // Pong Game Pattern
+#ifndef PONG_H
+#define PONG_H
+
 #include "pattern.h"
 #include "colors.h"
+#include "color_picker.h"
+#include "color_generator.h"
 
 #define DEBUG 0
 
@@ -17,6 +22,13 @@ class PongPattern : public Pattern {
                ball_width_ = 1;
             }
             ball_pos_ = 0;
+            // Fill up with some default colors in case none are set 
+            colors_.AddColor(BLUE);
+            colors_.AddColor(WHITE);
+            ball_color_ = colors_.NextColor();
+            wall_color_ = colors_.NextColor(); 
+            // Increment so that the next ball color is different 
+            colors_.NextColor(); 
             // step for the first time to set up the boundaries
             step();
          }
@@ -43,7 +55,7 @@ class PongPattern : public Pattern {
 #endif
       } 
 
-      void step() override {
+      virtual void step() override {
          // ball_pos_ is the center of the ball
          ball_pos_ = growing_ ? (ball_pos_ + 1) : (ball_pos_ - 1);
 
@@ -81,12 +93,12 @@ class PongPattern : public Pattern {
       }
 
       uint16_t frame_delay() {
-         uint16_t BPM = 64;
+         uint16_t BPM = 52;
          // every two beats should hit the walls
          return 1000*60/BPM/2/wall_spacing_;
       }
 
-      Pixel PongGenerator(uint16_t curr, uint16_t total) {
+      virtual Pixel PongGenerator(uint16_t curr, uint16_t total) {
 
          if ((curr >= ball_lower_) && (curr < ball_upper_)) {
             return ball_color_;
@@ -103,26 +115,21 @@ class PongPattern : public Pattern {
          
       }
 
-      void NextColor(){
+      virtual void NextColor(){
          wall_color_ = ball_color_;
-         color_index_ = (color_index_+1)%2;
-
-         if (color_index_ == 0){
-            ball_color_ = BLUE;
-         }
-         else if (color_index_ == 1) {
-            ball_color_ = RED; 
-         }
-         else if (color_index_ == 2) {
-            ball_color_ = GREEN;
-         }
-         else if (color_index_ == 3) {
-            ball_color_ = WHITE;
-         }
+         ball_color_ = colors_.NextColor();
 
       }
 
-   private:
+      void SetColorContainer(ColorContainer colors){
+         colors_ = colors;
+      }
+
+      void AddColor(Pixel color){
+         colors_.AddColor(color);
+      }
+
+   protected:
       uint16_t ball_width_;
       uint16_t wall_width_;
       uint16_t wall_spacing_;
@@ -133,8 +140,8 @@ class PongPattern : public Pattern {
       bool growing_=true;
       LinearRange* range_;
 
-      Pixel ball_color_ = BLUE;
-      Pixel wall_color_ = WHITE;
+      Pixel ball_color_;
+      Pixel wall_color_;
       Pixel background_color_ = BLACK;
 
       uint16_t wall_one_lower_; 
@@ -143,5 +150,48 @@ class PongPattern : public Pattern {
       uint16_t wall_two_upper_;
       uint16_t ball_lower_;
       uint16_t ball_upper_;
-      uint8_t color_index_; 
+      ColorContainer colors_;
 };
+
+class RainbowPongPattern : public PongPattern {
+
+   public:
+
+      RainbowPongPattern(uint16_t ball_width, uint16_t wall_width, 
+         uint16_t wall_spacing, uint16_t anchor, 
+         int16_t range_start, int16_t range_end) : 
+      PongPattern(ball_width, wall_width, 
+         wall_spacing, anchor, 
+         range_start, range_end) {}
+
+      void step() override {
+         PongPattern::step();
+
+         Pixel lower_color = HSVToRGB(ball_lower_*(65535/wall_spacing_) + color_offset_); 
+         Pixel upper_color = HSVToRGB(ball_upper_*(65535/wall_spacing_) + color_offset_);
+         gen_ = GradientGenerator(lower_color, upper_color);
+      }
+
+      Pixel PongGenerator(uint16_t curr, uint16_t total){
+
+         if (curr >= ball_lower_ && curr < ball_upper_){
+            return gen_(curr, total);
+         }
+         else {
+            return PongPattern::PongGenerator(curr, total);
+         }
+
+      }
+
+      void NextColor() override {
+         wall_color_ = colors_.NextColor();
+         color_offset_ += 1000; 
+      }
+
+   private:
+      ColorGenerator gen_;
+      uint16_t color_offset_ = 0;
+
+};
+
+#endif
