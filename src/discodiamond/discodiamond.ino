@@ -27,7 +27,7 @@ RainbowGlowPattern rainbow_glow;
 TheaterChasePattern theater_chase;
 GradientStretchyBoi rainbow_stretchy_boi(RED, GREEN, BLUE);
 
-StretchyBoiPattern stretchy_boi_dark(BLACK, BLACK);
+StretchyBoiPattern stretchy_boi_dark(BLACK, BLACK, false);
 StretchyBoiPattern stretchy_boi_color(TURQUOISE, PINK);
 
 RainbowSparklePattern rainbow_sparkle;
@@ -63,9 +63,6 @@ class PatternSwitcher {
    void NextPattern() {
       pFrame.ClearDimensions();
       pattern_index_ = (pattern_index_ + 1) % total_patterns_;
-      if (pattern_index_ == 0) {
-         pattern_looped_hook_();
-      }
       curr_pattern_ = patterns[pattern_index_];
       pattern_start_time_ = millis();
       curr_pattern_->init(&pFrame);
@@ -84,49 +81,42 @@ class PatternSwitcher {
       curr_pattern_->init(&pFrame);
    }
 
-   void setPatternLoopedHook(std::function<void()> pattern_looped_hook) {
-      pattern_looped_hook_ = pattern_looped_hook;
-   }
-
    private:
       Pattern* patterns[20];
       unsigned long pattern_start_time_;
       int pattern_index_;
       int total_patterns_;
       Pattern* curr_pattern_;
-
-      std::function<void()> pattern_looped_hook_;
 };
-
-int RandomHue() {
-   return random(0,360);
-}
 
 PatternSwitcher pattern_switcher;
 
-void PatternLoopedHook() {
-   // Change the colors up for stretchy bois
-   Square s = MakeSquare(RandomHue());
-   stretchy_boi_dark.setBackground(s.colors[1], s.colors[3]);
-   stretchy_boi_color.setColors(s.colors[0], s.colors[2]);
-   stretchy_boi_color.setBackground(s.colors[1], s.colors[3]);
-}
+long last_button_time = 0;
+#define BUTTON_DEBOUNCE_WINDOW_MS 500
 
 void nextPattern(){
+   long now = millis();
+   if (now < last_button_time + BUTTON_DEBOUNCE_WINDOW_MS) {
+      return;
+   }
    noInterrupts();
+   last_button_time = now;
    pattern_switcher.NextPattern();
    interrupts();
 }
 
 void prevPattern(){
+   long now = millis();
+   if (now < last_button_time + BUTTON_DEBOUNCE_WINDOW_MS) {
+      return;
+   }
    noInterrupts();
+   last_button_time = now;
    pattern_switcher.PrevPattern();
    interrupts();
 }
 
 void setup() {
-   ESP.wdtDisable();
-
    pinMode(PIN1, OUTPUT);
    pinMode(PIN2, OUTPUT);
    pinMode(PIN3, OUTPUT);
@@ -139,7 +129,6 @@ void setup() {
 
    Serial.begin(115200);
 
-   pattern_switcher.setPatternLoopedHook(PatternLoopedHook);
    pattern_switcher.AddPattern(&rainbow_glow);
    pattern_switcher.AddPattern(&rainbow_stretchy_boi);
    pattern_switcher.AddPattern(&theater_chase);

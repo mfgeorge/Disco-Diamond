@@ -1,13 +1,14 @@
 #include "colors.h"
 #include "pattern.h"
 #include "color_util.h"
+#include "color_picker.h"
 
 class StretchyBoiPattern : public Pattern {
  public:
    // Two part version
-   StretchyBoiPattern(Pixel color1, Pixel color2)
+   StretchyBoiPattern(Pixel color1, Pixel color2, bool color_switch=true)
        : growing(true), color1_(color1), color2_(color2), bg_color1_(WHITE),
-         bg_color2_(PINK) {}
+         bg_color2_(PINK), color_switch_(color_switch) {}
 
    virtual void initRanges(uint16_t initial_length) {
       *lower_half = LinearRange(0, initial_length + 10,
@@ -32,6 +33,12 @@ class StretchyBoiPattern : public Pattern {
           });
       // Slightly overlap ranges
       initRanges(initial_length);
+
+      if (color_switch_) {
+         Square s = MakeSquare(RandomHue());
+         setColors(s.colors[0], s.colors[2]);
+         setBackground(s.colors[1], s.colors[3]);
+      }
 
       lower_half->Wrap();
       upper_half->Wrap();
@@ -81,12 +88,13 @@ class StretchyBoiPattern : public Pattern {
    LinearRange* lower_half;
    LinearRange* upper_half;
    bool growing;
+   bool color_switch_;
 };
 
 class GradientStretchyBoi : public StretchyBoiPattern {
  public:
    GradientStretchyBoi(Pixel color1, Pixel color2, Pixel color3)
-       : StretchyBoiPattern(color1, color2), color3_(color3) {}
+       : StretchyBoiPattern(color1, color2, false), color3_(color3) {}
 
    void initRanges(uint16_t initial_length) override {
       *lower_half =

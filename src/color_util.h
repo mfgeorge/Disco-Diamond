@@ -83,4 +83,8 @@ Pixel DimColor(Pixel color, int dim_percent) {
    return {color.red * dim_percent / 100, color.green * dim_percent / 100, color.blue * dim_percent / 100};
 }
 
+int RandomHue() {
+   return random(0,360);
+}
+
 #endif
