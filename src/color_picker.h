@@ -51,6 +51,11 @@ struct ColorContainer{
       color_index = (color_index+1)%active_colors;
       return colors[color_index];
    }
+
+   void ClearColors(){
+      active_colors = 0;
+      color_index = 0;
+   }
 };
 
 

@@ -13,6 +13,7 @@
 #include <patterns/glow.h>
 #include <patterns/slide_expand.h>
 #include <patterns/rasta.h>
+#include <patterns/blank.h>
 
 #define PATTERN_DURATION_SEC 10
 
@@ -32,10 +33,15 @@ StretchyBoiPattern stretchy_boi_color(TURQUOISE, PINK);
 
 RainbowSparklePattern rainbow_sparkle;
 
-PongPattern pong(4, 8, 20, 2, 0, RANGE_MAX);
+
+RainbowPongPattern rainbow_pongos(4, 8, 26, 2, 0, RANGE_MAX);
+PongPattern pong(4, 8, 26, 2, 0, RANGE_MAX);
+
 GlowPattern glow1(HueInDegrees(180), HueInDegrees(300));
 
 RastaTheaterChase rasta_chase;
+
+BlankPattern blank;
 
 SlideExpandPattern slide_expand;
 RainbowTheaterChase rainbow_chase;
@@ -92,7 +98,7 @@ class PatternSwitcher {
 PatternSwitcher pattern_switcher;
 
 long last_button_time = 0;
-#define BUTTON_DEBOUNCE_WINDOW_MS 500
+#define BUTTON_DEBOUNCE_WINDOW_MS 100
 
 void nextPattern(){
    long now = millis();
@@ -129,18 +135,20 @@ void setup() {
 
    Serial.begin(115200);
 
-   pattern_switcher.AddPattern(&rainbow_glow);
-   pattern_switcher.AddPattern(&rainbow_stretchy_boi);
-   pattern_switcher.AddPattern(&theater_chase);
    pattern_switcher.AddPattern(&rainbow_sparkle);
    pattern_switcher.AddPattern(&stretchy_boi_dark);
    pattern_switcher.AddPattern(&stretchy_boi_color);
+   pattern_switcher.AddPattern(&rainbow_pongos);
    pattern_switcher.AddPattern(&pong);
    pattern_switcher.AddPattern(&glow1);
    pattern_switcher.AddPattern(&slide_expand);
    pattern_switcher.AddPattern(&rainbow_chase);
    pattern_switcher.AddPattern(&rasta);
    pattern_switcher.AddPattern(&rasta_chase);
+   pattern_switcher.AddPattern(&rainbow_glow);
+   pattern_switcher.AddPattern(&rainbow_stretchy_boi);
+   pattern_switcher.AddPattern(&theater_chase);
+   pattern_switcher.AddPattern(&blank);
    pattern_switcher.NextPattern();
 
    rainbow_stretchy_boi.setBackground(WHITE, PINK);

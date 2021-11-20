@@ -25,15 +25,17 @@ class PongPattern : public Pattern {
             // Fill up with some default colors in case none are set 
             colors_.AddColor(BLUE);
             colors_.AddColor(WHITE);
+            colors_.AddColor(RED);
             ball_color_ = colors_.NextColor();
-            wall_color_ = colors_.NextColor(); 
+            wall_color_one_ = colors_.NextColor(); 
+            wall_color_two_ = wall_color_one_;
             // Increment so that the next ball color is different 
             colors_.NextColor(); 
             // step for the first time to set up the boundaries
             step();
          }
 
-      void init(PatternFrame* pattern_frame) override {
+      virtual void init(PatternFrame* pattern_frame) override {
          uint8_t num_dims = pattern_frame->activeDimensions;
          // draw this pattern on the highest layer of the current 
          // dimension during init. make new dimension if none exist
@@ -50,6 +52,7 @@ class PongPattern : public Pattern {
             [this](uint16_t curr, uint16_t total) {
                return PongGenerator(curr, total);
             });
+         range_->EnableGammaCorrection();
 #if DEBUG
          Serial.println("Pong Pattern Initialized!");
 #endif
@@ -84,10 +87,12 @@ class PongPattern : public Pattern {
          if (ball_upper_ >= wall_two_lower_){
             growing_ = false;
             NextColor(); 
+            wall_color_two_ = wall_color_;
          }
          else if (ball_lower_ <= wall_one_upper_){
             growing_ = true;
             NextColor();
+            wall_color_one_ = wall_color_;
          }
 
       }
@@ -104,10 +109,10 @@ class PongPattern : public Pattern {
             return ball_color_;
          }
          else if ((curr >= wall_one_lower_) && (curr < wall_one_upper_)){
-            return wall_color_;
+            return wall_color_one_;
          }
          else if ((curr >= wall_two_lower_) && (curr < wall_two_upper_)){
-            return wall_color_;
+            return wall_color_two_;
          }
          else {
             return background_color_;
@@ -142,6 +147,8 @@ class PongPattern : public Pattern {
 
       Pixel ball_color_;
       Pixel wall_color_;
+      Pixel wall_color_one_; 
+      Pixel wall_color_two_;
       Pixel background_color_ = BLACK;
 
       uint16_t wall_one_lower_; 
@@ -162,7 +169,19 @@ class RainbowPongPattern : public PongPattern {
          int16_t range_start, int16_t range_end) : 
       PongPattern(ball_width, wall_width, 
          wall_spacing, anchor, 
-         range_start, range_end) {}
+         range_start, range_end) 
+      {}
+
+      void init(PatternFrame* pattern_frame) override {
+         PongPattern::init(pattern_frame);
+         // override the settings of the wall colors 
+         Triad c = MakeTriad(RandomHue());
+         colors_.ClearColors();
+         colors_.AddColor(c.colors[0]);
+         colors_.AddColor(c.colors[1]);
+         colors_.AddColor(c.colors[2]);
+         
+      }
 
       void step() override {
          PongPattern::step();
